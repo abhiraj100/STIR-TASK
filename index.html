@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>Trending Now</title>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #121212;
+        color: #e0e0e0;
+      }
+
+      .card {
+        text-align: center;
+        background: #1f1f1f;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        max-width: 600px;
+        width: 90%;
+      }
+
+      h1 {
+        font-size: 3rem;
+        color: #ffffff;
+        margin-bottom: 10px;
+      }
+
+      h6 {
+        font-size: 1rem;
+        color: #9e9e9e;
+        margin-bottom: 30px;
+      }
+
+      button {
+        padding: 15px 40px;
+        font-size: 20px;
+        border: none;
+        border-radius: 12px;
+        background-color: #4f46e5;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+      }
+
+      button:hover {
+        background-color: #4338ca;
+        box-shadow: 0 6px 16px rgba(67, 56, 202, 0.5);
+      }
+
+      button:disabled {
+        background-color: #a5b4fc;
+        box-shadow: none;
+        cursor: not-allowed;
+      }
+
+      .trend-container {
+        margin-top: 40px;
+      }
+
+      .trend-item {
+        margin: 15px 0;
+        padding: 18px;
+        border-radius: 10px;
+        background: #2a2a2a;
+        color: #e0e0e0;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .timestamp {
+        font-size: 1rem;
+        color: #9e9e9e;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="card">
+      <h1>Trending Topics</h1>
+      <button id="getTrendingBtn">Get Trending Now</button>
+      <h6>Click the button to fetch the latest trends</h6>
+      <div class="trend-container"></div>
+    </div>
+    <script>
+      const getTrendingBtn = document.getElementById("getTrendingBtn");
+      const trendContainer = document.querySelector(".trend-container");
+
+      getTrendingBtn.addEventListener("click", async (event) => {
+        event.preventDefault();
+        getTrendingBtn.disabled = true;
+        getTrendingBtn.textContent = "Fetching Trends...";
+        trendContainer.innerHTML = "<p class='trend-item'>Fetching data...</p>";
+
+        try {
+          const response = await axios.get("/trends");
+          const trendData = response.data.data;
+          trendContainer.innerHTML = "";
+
+          if (trendData && trendData.trends) {
+            trendData.trends.forEach((trend) => {
+              const trendElement = document.createElement("p");
+              trendElement.classList.add("trend-item");
+              trendElement.innerHTML = trend;
+              trendContainer.appendChild(trendElement);
+            });
+
+            const timestamp = document.createElement("p");
+            timestamp.classList.add("timestamp");
+            timestamp.innerHTML = `Data fetched at: ${new Date(
+              trendData.end
+            ).toLocaleTimeString()}`;
+            trendContainer.appendChild(timestamp);
+          } else {
+            trendContainer.innerHTML =
+              "<p class='trend-item'>No trends found.</p>";
+          }
+        } catch (error) {
+          console.log("Error:", error.response?.data?.message);
+          trendContainer.innerHTML =
+            "<p class='trend-item' style='color: red;'>Failed to fetch data. Please try again.</p>";
+        } finally {
+          getTrendingBtn.disabled = false;
+          getTrendingBtn.textContent = "Get Trending Now";
+        }
+      });
+    </script>
+  </body>
+</html>
